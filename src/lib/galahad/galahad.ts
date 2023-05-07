@@ -2,7 +2,6 @@
 
 import {NS} from '@ns';
 import {AttackSchedule, GTarget, n_arr4, XAVT} from "./mod";
-import {Scheduler} from "./lib/andromeda/andromeda";
 
 const _SRC =    {
     hack    : '/s.js',
@@ -22,6 +21,7 @@ export async function main(ns: NS) {
 
     let StartCallbacks = [... <number[]> _XAVTCFG.ASB?.durations];
 
+    // TODO: Replace with new submodule
     // let StartCallbacks = BuildInitTable(_CONFIG.durations, _CONFIG.longest, _CONFIG.deploy_offset);
 
     // ========== Core Scheduler clock ==========
@@ -35,11 +35,9 @@ export async function main(ns: NS) {
         counter = 0,
         start = new Date().getTime();
 
-    let Galahad = new Scheduler(ns, 20);
-    await Galahad.handler();
-
     async function instance() {
-        // ns.resizeTail(600, 300);
+        // ns.resizeTail(600, 300);     // Refreshing window
+
         //work out the real and ideal elapsed time
         let real    = counter * speed;
         let ideal   = new Date().getTime() - start;
@@ -118,7 +116,7 @@ function DeployChecker(ns: NS, clock: number, schedule: n_arr4, cluster_offsets:
         // If on schedule range
         if (clock >= schedule[i]) {
             let original = schedule[i];
-            Deploy(ns, i, 'joesguns', [1,1,1,1]);
+            // Deploy(ns, i, 'joesguns', [1,1,1,1]);
 
             if (clock > schedule[i]){
                 // ns.printf(`Drifted by ${clock - original} | Adjusting next offset of script ${i}`);
@@ -141,35 +139,11 @@ function DeployChecker(ns: NS, clock: number, schedule: n_arr4, cluster_offsets:
  * @param {string} target
  * @param {n_arr4} threads
  * */
-function Deploy(ns: NS, OPERATION: number, target: string, threads: n_arr4){
-    const UUID = crypto.randomUUID();
 
-    switch (OPERATION) {
-        case 0:
-            ns.exec(_SRC.hack, 'home', threads[0], target, 0, UUID, 0);
-            SimpleLog(ns, 0, UUID);
-            break;
-        case 1:
-            ns.exec(_SRC.weaken, 'home', threads[1], target, 0, UUID, 0);
-            SimpleLog(ns, 1, UUID);
-            break;
-        case 2:
-            ns.exec(_SRC.grow, 'home', threads[2], target, 0, UUID, 0);
-            SimpleLog(ns, 2, UUID);
-            break;
-        case 3:
-            ns.exec(_SRC.weaken, 'home', threads[3], target, 0, UUID, 0);
-            SimpleLog(ns, 3 , UUID);
-            break;
-        default:
-            ns.exit();
-    }
-}
 
 /**
  *  @param {import("../../index").NS} ns
  *  @param {number} opcode
- *  @param {string} target
  *  @param {string} UUID
  * */
 function SimpleLog(ns: NS, opcode: number, UUID: string){
