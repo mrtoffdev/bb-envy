@@ -18,7 +18,8 @@
         "outDir": "build/",
 
         "paths": {
-            "@ns": ["./src/index.d.ts"]
+            "@ns": ["./src/index.d.ts"],
+            "@tkit": ["./src/lib/tkit/Toolkit.ts"],
         }
     },
     "include": [
