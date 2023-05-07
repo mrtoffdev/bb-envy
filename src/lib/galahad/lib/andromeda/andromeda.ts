@@ -1,5 +1,7 @@
 // dev
-import {NS} from "../../../../index";
+import {NS} from "@ns";
+import {AxiomCFG, AxiomSrc, lock_n_arr4, n_arr4, SchedulerState, Strategy_L} from "../../mod";
+import {log} from "@tkit";
 
 // prod
 
