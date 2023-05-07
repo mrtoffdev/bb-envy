@@ -1,5 +1,5 @@
 // dev
-import { NS, ScriptArg } from '../../../../index'
+import { NS, ScriptArg } from '@ns'
 
 export async function main(ns: NS) {
 
