@@ -4,6 +4,10 @@ import {AxiomCFG, AxiomSrc, lock_n_arr4, n_arr4, SchedulerState, Strategy_L} fro
 import {log} from "@tkit";
 
 // prod
+import { _SRC } from '../axioms/sourcefiles'
+
+// let _SRC: AxiomSrc;
+// const _SRC_DIR = '/lib/galahad/lib/axioms/sourcefiles.txt'
 
 export async function main (ns: NS){
 
