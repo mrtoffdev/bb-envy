@@ -1,0 +1,42 @@
+Toolkits to Develop:
+1. Parallel
+    File management system w/ full duplex synchronization for BB <---> Local
+
+2. MCure
+    Static program analysis tool to calculate RAM reqs & suggest alternatives
+
+TODO LIST:
+Fix me module defs bcoz it's become confusing
+
+1. Build galahad
+    Galahad is the Supervisor Module, i.e. the module that performs the ff.
+
+        1. Build: Builds XAVT Config
+            1. calls all modules necessary for Server Forensics
+                Output includes:
+                    - Schedule
+
+            2. calls all modules necessary for Cluster Resource Allocation
+        2. Deploy: calls Andromeda Module to deploy XAVT config
+        3. Monitor: (Optional) calls all modules necessary for Server Resource Supervision
+        4. Extend: (Optional) calls Eulrvisor for either global or server specific network operations
+
+2. Build andromeda
+    Andromeda is the Deployment Module, i.e. the module that performs the ff.
+
+        1. Fetches deploy configurations from XAVT Config
+        2. Sends the latest build of /lib/Axiom to each involved AVTC
+        3. Sends a Schedule json file to each AVTC which includes the server's runtime configs
+            A. Each schedule contains timings / durations of when to init each axiom and for how long
+            B. JSON file also contains other details such as:
+                1. How many clusters are expected to run
+                2. Location of output files such as logs (if any)
+                3. Date of last Axiom library sync
+                4. Etc. (To be filled if necessary)
+
+3. Build eulrvisor
+    Eulrvisor is a Network Forensics Module that performs the ff.
+
+        1.  Profiles the network and builds a graph w/ each node containing necessary data for
+            other modules (Current build is generative, tail recursive, DFS based node builder)
+        2.  Includes net ops submodules such as Critterscan for automated | semi automated net-infilt

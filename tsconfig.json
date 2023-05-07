@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "watch": true,
+
+        "module": "ESNext",
+        "target": "ESNext",
+
+        "sourceMap": false,
+        "esModuleInterop": true,
+
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+
+        "skipLibCheck": true,
+        "lib": ["ES6", "ESNext","dom"],
+
+        "rootDir": "src/",
+        "outDir": "build/",
+
+        "paths": {
+            "@ns": ["./src/index.d.ts"]
+        }
+    },
+    "include": [
+        "./src"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+
+}

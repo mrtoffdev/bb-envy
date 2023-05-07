@@ -1,0 +1,40 @@
+{
+    "n00dles": {
+        "server": "n00dles",
+        "provider": "home",
+        "max_time": 19,
+        "offset": 25,
+        "durations": [
+            5,
+            19,
+            16,
+            19
+        ],
+        "stratagem": "_STRAT.hwgw",
+        "threads": [
+            122,
+            200,
+            14,
+            200
+        ]
+    },
+    "ecorp": {
+        "server": "foodnstuff",
+        "provider": "home",
+        "max_time": 21,
+        "offset": 25,
+        "durations": [
+            5,
+            21,
+            16,
+            21
+        ],
+        "stratagem" : "_STRAT.hwgw",
+        "threads": [
+            143,
+            200,
+            14,
+            14809
+        ]
+    }
+}
