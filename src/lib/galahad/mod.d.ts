@@ -1,5 +1,5 @@
 // Primitives
-import {NS} from "../../index";
+import {NS} from "@ns";
 
 export type n_arr4 = [number, number, number, number];
 
