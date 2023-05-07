@@ -1,9 +1,10 @@
 // Primitives
 import {NS} from "@ns";
 
-export type n_arr4 = [number, number, number, number];
+export type n_arr4      = [number, number, number, number];
+export type lock_n_arr4 = readonly [number, number, number, number];
 
-//#region Strategy type-guards & defs
+//#region Galahad type-guards & defs
 export {Strategy_L, Strategy, Stratagem, isStrategy};
 
 const Strategy_L = [
