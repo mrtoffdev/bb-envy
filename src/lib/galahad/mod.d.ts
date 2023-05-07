@@ -69,3 +69,36 @@ interface SRAT {
  * */
 //#endregion
 
+//#region Andromeda
+export interface SchedulerState {
+    ns          : NS,
+    active      : boolean,
+
+    clock       : number,
+    speed       : number,
+    cycles      : number,
+    start_time  : number,
+    TT          : number,
+    RT          : number,
+    offset      : number,
+}
+
+export interface AxiomCFG {
+    /**
+     *  Flags:
+     *  -- target   [string]
+     *  -- mode     ['loop' | '<any>']
+     *  -- delay    [number]
+     *  -- id       [string]
+     * */
+    target: string,
+    mode: string,
+    delay: number,
+    id: string
+}
+
+export interface AxiomSrc {
+    spoof   : string,
+    exploit : string,
+    deposit : string,
+}
