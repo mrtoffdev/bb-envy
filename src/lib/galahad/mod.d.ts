@@ -80,7 +80,8 @@ export interface SchedulerState {
     start_time  : number,
     TT          : number,
     RT          : number,
-    offset      : number,
+    interval    : number,
+    axiom_offset: number,
 }
 
 export interface AxiomCFG {
