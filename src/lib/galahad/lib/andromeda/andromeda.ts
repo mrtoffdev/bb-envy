@@ -12,30 +12,40 @@ import { _SRC } from '../axioms/sourcefiles'
 export async function main (ns: NS){
 
     const InitSchedulerState: SchedulerState = {
-        ns         : ns,
-        active     : true,
+        ns          : ns,
+        active      : true,
 
-        start_time : new Date().getTime(),
-        cycles     : 0,
-        clock      : 0,
-        speed      : 20,
-        offset     : 0,
-        RT         : 0,
-        TT         : 0,
+        start_time  : new Date().getTime(),
+        cycles      : 0,
+        clock       : 0,
+        speed       : 20,
+        RT          : 0,
+        TT          : 0,
+        interval    : 1000,
+        axiom_offset: 25,
     }
+
+    // Create Scheduler
+
+    let Andromeda = new Scheduler(ns, InitSchedulerState);
+    await Andromeda.handler(() => {
+
+    })
 }
 
 export class Scheduler {
     
     state       : SchedulerState;
+    schedule    : n_arr4;
 
     constructor (ns: NS, state: SchedulerState){
         this.state      = state;
+        this.schedule   = [0, 0, 0, 0];
     }
 
-    async handler (callback ?: (logs ?: string) => {}){
+    async handler(callback ?: (logs?: string | undefined) => any){
         while (this.state.active) {
-            if (callback != undefined) callback();
+            if (callback != undefined) callback('string');
 
             // handler events
 
@@ -45,10 +55,38 @@ export class Scheduler {
 
             this.state.TT       = this.state.cycles * this.state.speed;
             this.state.RT       = new Date().getTime() - this.state.start_time;
-            this.state.offset   = this.state.RT - this.state.TT;
+            const diff          = this.state.RT - this.state.TT;
 
-            await this.state.ns.sleep(this.state.speed - this.state.offset);
+            await this.state.ns.sleep(this.state.speed - diff);
         }
+    }
+
+    async update_sched(ns: NS, index: number, schedule?: n_arr4){
+        let table = [0,0,0,0];
+
+        if (schedule === undefined) schedule = this.schedule;
+
+        let steps = schedule.length;
+
+        for (let i = 0; i < steps; i++){
+            // If on schedule range
+            if (this.state.clock >= schedule[i]) {
+                let original = schedule[i];
+                // Deploy(ns, i, 'joesguns', [1,1,1,1]);
+
+                if (this.state.clock > schedule[i]){
+                    // ns.printf(`Drifted by ${clock - original} | Adjusting next offset of script ${i}`);
+                    // table[i] = original + ((1000 + _CONFIG.cluster_offsets) - (clock - original)); // PATCH SPACE FOR HACK
+                    table[i] = original + (this.state.interval + this.state.axiom_offset);
+                } else {
+                    table[i] = original + (this.state.interval + this.state.axiom_offset);
+                }
+            } else {
+                table[i] = schedule[i];
+            }
+        }
+
+        return table;
     }
 
     Deploy(ns: NS, OPERATION: number, target: string, threads: lock_n_arr4){
@@ -84,5 +122,18 @@ export class Scheduler {
         }
 
         log (ns, 'scriptlog', `[Andromeda] : Deployed ${operation[op_code]}`)
+    }
+
+    /**
+     * @param {n_arr4} DURATIONS
+     * @param {number} RUNTIME
+     * @param {number} OFFSET
+     * */
+    BuildInitTable(DURATIONS: n_arr4, RUNTIME: number, OFFSET: number){
+        let out = [];
+        for (let i = 0; i < DURATIONS.length; i++){
+            out[i] = (RUNTIME - DURATIONS[i]) + (i*OFFSET);
+        }
+        return out;
     }
 }

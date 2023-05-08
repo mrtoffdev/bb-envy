@@ -86,21 +86,8 @@ class Utility {
             ASB         : _DEMO_ATTACKSCHED,
         };
     }
-
 }
 
-/**
- * @param {n_arr4} DURATIONS
- * @param {number} RUNTIME
- * @param {number} OFFSET
- * */
-function BuildInitTable(DURATIONS: n_arr4, RUNTIME: number, OFFSET: number){
-    let out = [];
-    for (let i = 0; i < DURATIONS.length; i++){
-        out[i] = (RUNTIME - DURATIONS[i]) + (i*OFFSET);
-    }
-    return out;
-}
 
 /**
  * @param {NS} ns
@@ -108,54 +95,19 @@ function BuildInitTable(DURATIONS: n_arr4, RUNTIME: number, OFFSET: number){
  * @param {n_arr4} schedule
  * @param {number} cluster_offsets
  * */
-function DeployChecker(ns: NS, clock: number, schedule: n_arr4, cluster_offsets: number){
-    let table = [0,0,0,0];
-    let steps = schedule.length;
-
-    for (let i = 0; i < steps; i++){
-        // If on schedule range
-        if (clock >= schedule[i]) {
-            let original = schedule[i];
-            // Deploy(ns, i, 'joesguns', [1,1,1,1]);
-
-            if (clock > schedule[i]){
-                // ns.printf(`Drifted by ${clock - original} | Adjusting next offset of script ${i}`);
-                // table[i] = original + ((1000 + _CONFIG.cluster_offsets) - (clock - original)); // PATCH SPACE FOR HACK
-                table[i] = original + (1000 + cluster_offsets);
-            } else {
-                table[i] = original + (1000 + cluster_offsets);
-            }
-        } else {
-            table[i] = schedule[i];
-        }
-    }
-
-    return table;
-}
-
-/**
- * @param {import("../../index").NS} ns
- * @param {number} OPERATION
- * @param {string} target
- * @param {n_arr4} threads
- * */
 
 
-/**
- *  @param {import("../../index").NS} ns
- *  @param {number} opcode
- *  @param {string} UUID
- * */
 function SimpleLog(ns: NS, opcode: number, UUID: string){
-    let operation = opcode == 0 ?
-        `Hack` :
+    let operation =
+        opcode == 0 ?
+            `Hack` :
         opcode == 1 ?
             `Weaken I` :
-            opcode == 2 ?
-                `Grow` :
-                opcode == 3 ?
-                    `Weaken II` :
-                    ``;
+        opcode == 2 ?
+            `Grow` :
+        opcode == 3 ?
+            `Weaken II` :
+        undefined;
     // let dialogue =  `\u001b[38;5;214m[Target]\u001b[0m ${target} `+
         `\u001b[38;5;214m[Operation]\u001b[0m ${operation} `+
         // `\u001b[38;5;214m[Threads]\u001b[0m ${_CONFIG.threads[opcode]} `+
@@ -163,35 +115,4 @@ function SimpleLog(ns: NS, opcode: number, UUID: string){
         let dialogue = 'test';
 
     ns.printf(`${dialogue}`);
-}
-
-function ClockV2() {
-    // ns.disableLog('sleep');
-    // let timeouts = {};
-    // let speed = 50,
-    // 	counter = 0,
-    //     start = new Date().getTime();
-
-    // async function instance() {
-    //     ns.resizeTail(600, 300);
-    //     //work out the real and ideal elapsed time
-    //     let real = counter * speed,
-    //         ideal = new Date().getTime() - start;
-
-    //     //increment the counter
-    //     counter++;
-
-    //     //calculate and display the difference
-    //     let diff = ideal - real;
-    //     ns.clearLog();
-    //     ns.printf(`Expected: ${real}`);
-    // 	ns.printf(`Real: ${real}`);
-    //     ns.printf(`Diff: ${diff}`);
-
-    //     await ns.sleep(speed - diff);
-    //     await instance();
-    // }
-
-    // await ns.sleep(speed)
-    // await instance();
 }
