@@ -40,3 +40,10 @@ Fix me module defs bcoz it's become confusing
         1.  Profiles the network and builds a graph w/ each node containing necessary data for
             other modules (Current build is generative, tail recursive, DFS based node builder)
         2.  Includes net ops submodules such as Critterscan for automated | semi automated net-infilt
+
+
+General Architechture:
+
+    A.  Modules will be run on different NS instances / Script instances instead of being linkable via ESM.
+        This prevents the whole system from taking up too much RAM, and allows us fine grained control over
+        which processes are enabled on runtime.
