@@ -77,11 +77,23 @@ export interface SchedulerState {
     clock       : number,
     speed       : number,
     cycles      : number,
+    diff        : number,
     start_time  : number,
     TT          : number,
     RT          : number,
     interval    : number,
     axiom_offset: number,
+}
+
+export interface DispatcherState {
+    ns          : NS,
+    active      : boolean,
+
+    host        : string,
+    target      : string,
+
+    threads     : n_arr4,
+    source      : AxiomSrc,
 }
 
 export interface AxiomCFG {
@@ -92,10 +104,12 @@ export interface AxiomCFG {
      *  -- delay    [number]
      *  -- id       [string]
      * */
-    target: string,
-    mode: string,
-    delay: number,
-    id: string
+    host    : string,
+
+    target  : string,
+    mode    : string,
+    delay   : number,
+    id      : string
 }
 
 export interface AxiomSrc {

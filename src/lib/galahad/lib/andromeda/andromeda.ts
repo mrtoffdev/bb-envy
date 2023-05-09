@@ -1,13 +1,10 @@
 // dev
 import {NS} from "@ns";
-import {AxiomCFG, AxiomSrc, lock_n_arr4, n_arr4, SchedulerState, Strategy_L} from "../../mod";
+import {AxiomCFG, AxiomSrc, DispatcherState, lock_n_arr4, n_arr4, SchedulerState, Strategy_L} from "../../mod";
 import {log} from "@tkit";
 
 // prod
 import { _SRC } from '../axioms/sourcefiles'
-
-// let _SRC: AxiomSrc;
-// const _SRC_DIR = '/lib/galahad/lib/axioms/sourcefiles.txt'
 
 export async function main (ns: NS){
 
@@ -19,6 +16,7 @@ export async function main (ns: NS){
         cycles      : 0,
         clock       : 0,
         speed       : 20,
+        diff        : 0,
         RT          : 0,
         TT          : 0,
         interval    : 1000,
@@ -33,14 +31,78 @@ export async function main (ns: NS){
     })
 }
 
+export class Dispatcher {
+
+    state       : DispatcherState;
+    scheduler   : Scheduler;
+
+    constructor(ns: NS, state: DispatcherState, parent: Scheduler) {
+        this.state      = state;
+        this.scheduler  = parent;
+    }
+
+    deploy (OperationID: number): void | string{
+        const UUID      = crypto.randomUUID();
+        const operation = Strategy_L;
+        let op_code     = 0;
+
+        let cfg: AxiomCFG = {
+            host    : this.state.host,
+            target  : this.state.target,
+            mode    : 'once',
+            delay   : 0,
+            id      : UUID,
+        }
+
+        let op_src: string = '';
+
+        switch (OperationID) {
+            case 0: op_src = this.state.source.spoof;   break;
+            case 1: op_src = this.state.source.exploit; break;
+            case 2: op_src = this.state.source.deposit; break;
+            case 3: op_src = this.state.source.exploit; break;
+            default: return "[Andromeda] : Err; Cannot identify OperationID";
+        }
+
+        this.state.ns.exec(
+            op_src,
+            cfg.host,
+            this.state.threads[OperationID],
+            '--target', `${this.state.target}`,
+            '--mode', 'once',
+            '--delay', 0,
+            '--id', crypto.randomUUID());
+
+        log (this.state.ns,
+            'scriptlog',
+            `[Andromeda] : Deployed ${operation[op_code]}`)
+    }
+}
+
 export class Scheduler {
     
     state       : SchedulerState;
-    schedule    : n_arr4;
+    schedules   : n_arr4[];
+    dispatcher  : Dispatcher;
 
     constructor (ns: NS, state: SchedulerState){
         this.state      = state;
-        this.schedule   = [0, 0, 0, 0];
+        this.schedules  = [
+            [0,0,0,0]
+        ]
+
+        let DispState: DispatcherState = {
+            ns      : this.state.ns,
+            active  : true,
+
+            host    : 'home',
+            target  : '',
+
+            threads : [0,0,0,0],
+            source  : _SRC,
+        }
+
+        this.dispatcher = new Dispatcher(this.state.ns, DispState, this);
     }
 
     async handler(callback ?: (logs?: string | undefined) => any){
@@ -49,79 +111,91 @@ export class Scheduler {
 
             // handler events
 
+            await this.check_sched((s_index: number, c_index: number) => {
+                // If schedule matches, perform ff:
+                this.update_sched(s_index, c_index);
+                this.dispatcher.deploy(c_index);
+            });
 
+            // Clock Updates
 
-            // refresh clocks & enforce correction
-
-            this.state.TT       = this.state.cycles * this.state.speed;
-            this.state.RT       = new Date().getTime() - this.state.start_time;
-            const diff          = this.state.RT - this.state.TT;
-
-            await this.state.ns.sleep(this.state.speed - diff);
+            await this.update_clock();
+            await this.state.ns.sleep(this.state.speed - this.state.diff);
         }
     }
 
-    async update_sched(ns: NS, index: number, schedule?: n_arr4){
-        let table = [0,0,0,0];
+    async update_clock(){
+        // refresh clocks & enforce correction
+        this.state.TT       = this.state.cycles * this.state.speed;
+        this.state.RT       = new Date().getTime() - this.state.start_time;
 
-        if (schedule === undefined) schedule = this.schedule;
+        this.state.diff     = this.state.RT - this.state.TT;
 
-        let steps = schedule.length;
+        this.state.cycles ++;
+        this.state.clock += this.state.speed;
+    }
 
-        for (let i = 0; i < steps; i++){
-            // If on schedule range
-            if (this.state.clock >= schedule[i]) {
-                let original = schedule[i];
-                // Deploy(ns, i, 'joesguns', [1,1,1,1]);
+    async check_sched(callback: (s_index: number, c_index: number) => any){
+        /**
+         *  Function that checks the schedule collection for collisions. If a collision is found,
+         *  the passed in callback function is called
+         *  @callback callback
+         * */
 
-                if (this.state.clock > schedule[i]){
-                    // ns.printf(`Drifted by ${clock - original} | Adjusting next offset of script ${i}`);
-                    // table[i] = original + ((1000 + _CONFIG.cluster_offsets) - (clock - original)); // PATCH SPACE FOR HACK
-                    table[i] = original + (this.state.interval + this.state.axiom_offset);
-                } else {
-                    table[i] = original + (this.state.interval + this.state.axiom_offset);
+        // Iterate through all schedules
+        for (let schedule of this.schedules) {
+
+            // Iterate through all schedule cells
+            for (let cell of schedule){
+
+                if (this.state.clock >= cell) {
+                    let s_index = this.schedules.indexOf(schedule);
+                    let c_index = schedule.indexOf(cell);
+                    callback(s_index, c_index);
                 }
-            } else {
-                table[i] = schedule[i];
+
             }
         }
-
-        return table;
     }
 
-    Deploy(ns: NS, OPERATION: number, target: string, threads: lock_n_arr4){
-        const UUID      = crypto.randomUUID();
-        const operation = Strategy_L;
-        let op_code     = 0;
+    async update_sched(s_index: number, c_index: number, schedule?: n_arr4){
+        /**
+         *  Updates the selected schedule to contain the next execution time based on Scheduler state data.
+         *  If this function received a Schedule (n_arr4), overwrite the schedule in state with the new one instead
+         * */
 
-        let cfg: AxiomCFG = {
-            target  : target,
-            mode    : 'once',
-            delay   : 0,
-            id      : UUID,
-        }
-        switch (OPERATION) {
-            case 0:
-                ns.exec(_SRC.spoof, 'home', threads[0], target, 0, UUID, 0);
-                op_code = 0;
-                break;
-            case 1:
-                ns.exec(_SRC.exploit, 'home', threads[1], target, 0, UUID, 0);
-                op_code = 1;
-                break;
-            case 2:
-                ns.exec(_SRC.deposit, 'home', threads[2], target, 0, UUID, 0);
-                op_code = 2;
-                break;
-            case 3:
-                ns.exec(_SRC.exploit, 'home', threads[3], target, 0, UUID, 0);
-                op_code = 1;
-                break;
-            default:
-                ns.exit();
-        }
+        const Schedule  = this.schedules.at(s_index);
 
-        log (ns, 'scriptlog', `[Andromeda] : Deployed ${operation[op_code]}`)
+        if (Schedule != undefined){
+            let Cell    = Schedule.at(c_index) ?? 0;
+            Cell        += this.state.interval + this.state.axiom_offset;
+        }
+        // let table = [0,0,0,0];
+        //
+        // // Optional:
+        //
+        // if (schedule === undefined) schedule = this.schedules;
+        //
+        // let steps = schedule.length;
+        //
+        // for (let i = 0; i < steps; i++){
+        //     // If on schedule range
+        //     if (this.state.clock >= schedule[i]) {
+        //         let original = schedule[i];
+        //         // Deploy(ns, i, 'joesguns', [1,1,1,1]);
+        //
+        //         if (this.state.clock > schedule[i]){
+        //             // ns.printf(`Drifted by ${clock - original} | Adjusting next offset of script ${i}`);
+        //             // table[i] = original + ((1000 + _CONFIG.cluster_offsets) - (clock - original)); // PATCH SPACE FOR HACK
+        //             table[i] = original + (this.state.interval + this.state.axiom_offset);
+        //         } else {
+        //             table[i] = original + (this.state.interval + this.state.axiom_offset);
+        //         }
+        //     } else {
+        //         table[i] = schedule[i];
+        //     }
+        // }
+
     }
 
     /**
