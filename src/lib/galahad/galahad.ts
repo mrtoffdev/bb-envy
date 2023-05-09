@@ -3,12 +3,6 @@
 import {NS} from '@ns';
 import {AttackSchedule, GTarget, n_arr4, XAVT} from "./mod";
 
-const _SRC =    {
-    hack    : '/s.js',
-    grow    : '/c.js',
-    weaken  : '/p.js',
-};
-
 export async function main(ns: NS) {
     ns.disableLog('sleep');
     ns.disableLog('exec');
@@ -86,33 +80,4 @@ class Utility {
             ASB         : _DEMO_ATTACKSCHED,
         };
     }
-}
-
-
-/**
- * @param {NS} ns
- * @param {number} clock
- * @param {n_arr4} schedule
- * @param {number} cluster_offsets
- * */
-
-
-function SimpleLog(ns: NS, opcode: number, UUID: string){
-    let operation =
-        opcode == 0 ?
-            `Hack` :
-        opcode == 1 ?
-            `Weaken I` :
-        opcode == 2 ?
-            `Grow` :
-        opcode == 3 ?
-            `Weaken II` :
-        undefined;
-    // let dialogue =  `\u001b[38;5;214m[Target]\u001b[0m ${target} `+
-        `\u001b[38;5;214m[Operation]\u001b[0m ${operation} `+
-        // `\u001b[38;5;214m[Threads]\u001b[0m ${_CONFIG.threads[opcode]} `+
-        `\u001b[38;5;214m[UUID]\u001b[0m ${UUID}`;
-        let dialogue = 'test';
-
-    ns.printf(`${dialogue}`);
 }
