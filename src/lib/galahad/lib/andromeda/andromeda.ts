@@ -1,54 +1,79 @@
 // dev
 import {NS} from "@ns";
-import {AxiomCFG, AxiomSrc, DispatcherState, lock_n_arr4, n_arr4, SchedulerState, Strategy_L} from "../../mod";
+import {AxiomCFG, AxiomSrc, DispatcherState, lock_n_arr4, n_arr4, SchedulerState, Axiom_L, XAVT} from "../../mod";
 import {log} from "@tkit";
 
 // prod
 import { _SRC } from '../axioms/sourcefiles'
 
+// standalone call
 export async function main (ns: NS){
 
-    const InitSchedulerState: SchedulerState = {
-        ns          : ns,
-        active      : true,
+    // Demo XAVT config
+    const _DEMO_XAVT: XAVT = {
+        target: {
+            target      : 'n00dles',
+            provider    : 'home',
+        },
+        ASB: {
+            n00dles: {
+                stratagem   : ['spoof', 'exploit', 'deposit', 'exploit'],
 
-        start_time  : new Date().getTime(),
-        cycles      : 0,
-        clock       : 0,
-        speed       : 20,
-        diff        : 0,
-        RT          : 0,
-        TT          : 0,
-        interval    : 1000,
-        axiom_offset: 25,
+                t_cycle_all : [0,0,0,0],
+                t_cycle_max : 0,
+
+                threads     :[0,0,0,0],
+                offset      : 50
+            }
+        }
     }
 
     // Create Scheduler
-
-    let Andromeda = new Scheduler(ns, InitSchedulerState);
+    let Andromeda = new Scheduler(ns, _DEMO_XAVT);
     await Andromeda.handler(() => {
 
-    })
+    });
 }
 
-export class Dispatcher {
+/**--------------------------------------------------------*/
+/*  Andromeda Scheduler & Dispatcher Module
+/**--------------------------------------------------------*/
 
-    state       : DispatcherState;
+// ====================== Dispatcher ======================
+
+export class Dispatcher {
+    ns          : NS;
+    active      : boolean;
+
+    host        : string;
+    target      : string;
+
+    threads     : n_arr4;
+    sources     : AxiomSrc;
+
     scheduler   : Scheduler;
 
-    constructor(ns: NS, state: DispatcherState, parent: Scheduler) {
-        this.state      = state;
+    constructor(state: DispatcherState, parent: Scheduler) {
+        this.ns         = state.ns;
+        this.active     = state.active;
+
+        this.host       = state.host;
+        this.target     = state.target;
+
+        this.threads    = state.threads;
+        this.sources    = state.sources;
+
         this.scheduler  = parent;
     }
 
     deploy (OperationID: number): void | string{
         const UUID      = crypto.randomUUID();
-        const operation = Strategy_L;
+        const operation = Axiom_L;
         let op_code     = 0;
 
         let cfg: AxiomCFG = {
-            host    : this.state.host,
-            target  : this.state.target,
+            host    : this.host,
+            target  : this.target,
             mode    : 'once',
             delay   : 0,
             id      : UUID,
@@ -57,27 +82,29 @@ export class Dispatcher {
         let op_src: string = '';
 
         switch (OperationID) {
-            case 0: op_src = this.state.source.spoof;   break;
-            case 1: op_src = this.state.source.exploit; break;
-            case 2: op_src = this.state.source.deposit; break;
-            case 3: op_src = this.state.source.exploit; break;
+            case 0: op_src = this.sources.spoof;   break;
+            case 1: op_src = this.sources.exploit; break;
+            case 2: op_src = this.sources.deposit; break;
+            case 3: op_src = this.sources.exploit; break;
             default: return "[Andromeda] : Err; Cannot identify OperationID";
         }
 
-        this.state.ns.exec(
+        this.ns.exec(
             op_src,
             cfg.host,
-            this.state.threads[OperationID],
-            '--target', `${this.state.target}`,
+            this.threads[OperationID],
+            '--target', `${this.target}`,
             '--mode', 'once',
             '--delay', 0,
             '--id', crypto.randomUUID());
 
-        log (this.state.ns,
+        log (this.ns,
             'scriptlog',
-            `[Andromeda] : Deployed ${operation[op_code]}`)
+            `[Andromeda] : Deployed ${operation[op_code]}`);
     }
 }
+
+// ====================== Scheduler ======================
 
 export class Scheduler {
     
@@ -85,8 +112,23 @@ export class Scheduler {
     schedules   : n_arr4[];
     dispatcher  : Dispatcher;
 
-    constructor (ns: NS, state: SchedulerState){
-        this.state      = state;
+    constructor (ns: NS, XAVT: XAVT){
+
+        this.state      = {
+            ns          : ns,
+            active      : true,
+
+            start_time  : new Date().getTime(),
+            cycles      : 0,
+            clock       : 0,
+            speed       : 20,
+            diff        : 0,
+            RT          : 0,
+            TT          : 0,
+            interval    : 1000,
+            axiom_offset: 25,
+        }
+
         this.schedules  = [
             [0,0,0,0]
         ]
@@ -99,10 +141,10 @@ export class Scheduler {
             target  : '',
 
             threads : [0,0,0,0],
-            source  : _SRC,
+            sources : _SRC,
         }
 
-        this.dispatcher = new Dispatcher(this.state.ns, DispState, this);
+        this.dispatcher = new Dispatcher(DispState, this);
     }
 
     async handler(callback ?: (logs?: string | undefined) => any){
