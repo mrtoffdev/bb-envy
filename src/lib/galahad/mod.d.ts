@@ -5,29 +5,44 @@ export type n_arr4      = [number, number, number, number];
 export type lock_n_arr4 = readonly [number, number, number, number];
 
 //#region Galahad type-guards & defs
-export {Strategy_L, Strategy, Stratagem, isStrategy};
+export {Axiom_L, Axiom, Stratagem, isStrategy};
 
-const Strategy_L = [
+const Axiom_L = [
     'spoof',
     'exploit',
     'deposit'
 ] as const;
 
-type Stratagem      = Strategy[];
-type Strategy       = (typeof Strategy_L)[number];
+type Stratagem      = Axiom[];
+type Axiom = (typeof Axiom_L)[number];
 
-const isStrategy    = (In: any): In is Strategy => {
+const isStrategy    = (In: any): In is Axiom => {
     return Strategy_L.indexOf(In) !== -1;
 }
 //#endregion
 
 //#region XAVT
 
-export {XAVT, GTarget, AttackSchedule,SchedUnit, SRAT}
+export {XAVT, GTarget, AttackScheduleBlueprint,SchedUnit, SRAT}
+
+/**
+ *  Cross AVT Config
+ *  XAVT is a master object that contains all the configuration data required by the Andromeda Module
+ *
+ *  Specification:
+ *  - Target: {host, target}: string
+ *  - ASB   :
+ *      Stratagem = contains the sequence of Axioms to perform in one deploy interval
+ *      - Stratagem : (Common) n_arr4[Axiom]
+ *                  : (Optional) n_arrX[Axiom]
+ *
+ * */
+
+// [main] --- target ---> [Galahad] --- XAVT ---> [Andromeda] --- CFG ---> [AVT Channel] ++> Axioms(inf)
 
 interface XAVT {
     target  : GTarget,
-    ASB     ?: AttackSchedule,
+    ASB     ?: {[target: string]:AttackScheduleBlueprint},
     SRAT    ?: SRAT,
 }
 
@@ -36,9 +51,16 @@ interface GTarget {
     provider    : string,
 }
 
-interface AttackSchedule {
+/**
+ *  Attack Schedule Blueprint
+ *  ASB
+ * */
+interface AttackScheduleBlueprint {
     stratagem   : Stratagem,
-    durations   : n_arr4,
+
+    t_cycle_all : n_arr4,
+    t_cycle_max : number,
+
     threads     : n_arr4,
     offset      : number,
 }
@@ -50,6 +72,14 @@ interface SchedUnit {
     intervals       : number,
 }
 
+interface Metadata {
+
+}
+
+/**
+ *  Schedules, Resource Allocation, Thresholds
+ *  SRAT
+ * */
 interface SRAT {
     [server: string]: SchedUnit
 }
@@ -68,6 +98,10 @@ interface SRAT {
  *              - size: same as stratagem/
  * */
 //#endregion
+
+export interface GalahadState {
+    clusternet  : XAVT[],
+}
 
 //#region Andromeda
 export interface SchedulerState {
@@ -93,7 +127,7 @@ export interface DispatcherState {
     target      : string,
 
     threads     : n_arr4,
-    source      : AxiomSrc,
+    sources     : AxiomSrc,
 }
 
 export interface AxiomCFG {
