@@ -1,0 +1,51 @@
+body {
+    padding: 1em 3em;
+    background: #242424;
+
+    font-family: Roboto, sans-serif;
+    color: white;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+}
+
+blockquote {
+    margin: 1em 2em;
+    padding: 1em 2em;
+    background: #181818;
+}
+
+li {
+    flex: auto;
+    flex-direction: column;
+}
+
+span.small {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+span.large {
+    display: block;
+    margin-bottom: 1.5em;
+}
+
+p {
+    margin: 0.7em 0;
+    line-height: 1.2em;
+}
+
+p.code {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: navajowhite;
+}
+
+blockquote.code {
+    font-family: "JetBrains Mono", sans-serif;
+    font-weight: normal;
+    font-size: 0.8rem;
+    white-space: pre-line;
+}
