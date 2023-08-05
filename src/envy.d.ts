@@ -2,7 +2,8 @@
 /**
  *  ================== Number Formats ==================
  **/
-import {TableDB} from './lib/tkit/Toolkit';
+import {TableDB} from '@tkit';
+import {FafnirRuntimeMode, FafnirRuntimeModeL} from "./lib/eulrvisor/mod";
 
 export {EDataFormat, EUnitFormat, ETimeFormat};
 export type Format = DataFormat | UnitFormat | TimeFormat;
@@ -59,7 +60,8 @@ export type TableCell = [string, number];
 //#region === Exploit Programs (Built in) ===
 
 export class ExploitDB {
-    exploits: Exploit[] = [
+    name: string = "ExploitDB";
+    public static exploits: Exploit[] = [
         {
             file        : 'BruteSSH.exe',
             cmd         : 'brutessh',
@@ -99,11 +101,21 @@ export class ExploitDB {
             port        : 'sql',
             cost        : 500000,
             lvl         : 250
+        },
+        {
+            file        : 'NUKE.exe',
+            cmd         : 'nuke',
+            serverprop  : 'hasAdminRights',
+            port        : 'shell',
+            cost        : 0,
+            lvl         : 0
         }
-    ]
+    ];
+
     run (Callback: (value: Exploit, index: number, array: Exploit[]) => void) {
         this.exploits.forEach(Callback);
     }
+
 }
 
 export interface Exploit {
@@ -113,6 +125,12 @@ export interface Exploit {
     port: string,
     cost: number,
     lvl: number,
+}
+
+const ExploitCmdL = ['brutessh', 'ftpcrack', 'relaysmtp', 'httpworm', 'sqlinject', 'nuke'] as const;
+export type ExploitCmd = (typeof ExploitCmdL)[number];
+export function isExploitCmd(In: any): In is ExploitCmd {
+    return ExploitCmdL.indexOf(In) !== -1;
 }
 //#endregion
 

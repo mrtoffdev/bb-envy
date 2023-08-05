@@ -105,18 +105,22 @@ export interface GalahadState {
 
 //#region Andromeda
 export interface SchedulerState {
+    // configuration
     ns          : NS,
     active      : boolean,
-
-    clock       : number,
     speed       : number,
-    cycles      : number,
-    diff        : number,
-    start_time  : number,
-    TT          : number,
-    RT          : number,
     interval    : number,
     axiom_offset: number,
+
+    // self-correction
+    TT          : number,
+    RT          : number,
+    diff        : number,
+
+    // observable
+    clock       : number,
+    cycles      : number,
+    start_time  : number,
 }
 
 export interface DispatcherState {

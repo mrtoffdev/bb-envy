@@ -35,7 +35,7 @@ type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
 const HOST: &str                = "127.0.0.1";
 const SERVER_PORT: u16          = 25545;
-const FILELIST_REQUEST: &str    = r#"
+const FS_REQUEST: &str          = r#"
     {
     "jsonrpc": "2.0",
     "id": 11,
@@ -48,6 +48,8 @@ const FILELIST_REQUEST: &str    = r#"
 #[tokio::main]
 async fn main() -> Result<(), IoError> {
     SimpleLogger::new().init().unwrap();
+
+    let CONNECTION_ADDR = env::args().nth(1).unwrap_or_else(|| format!("{}:{}", HOST, SERVER_PORT));
     let addr = env::args().nth(1).unwrap_or_else(|| format!("{}:{}", HOST, SERVER_PORT));
 
     let state = PeerMap::new(Mutex::new(HashMap::new()));
@@ -67,7 +69,7 @@ async fn main() -> Result<(), IoError> {
 
 async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
 
-    let request_ = String::from(FILELIST_REQUEST).into_bytes();
+    let request_ = String::from(FS_REQUEST).into_bytes();
 
     println!("Incoming TCP connection from: {}", addr);
     let ws_stream = tokio_tungstenite::accept_async(raw_stream)

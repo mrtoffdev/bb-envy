@@ -92,11 +92,14 @@ export interface TDBRequest {
     value   ?: string | string[],
 }
 
+
 export interface TDBResponse {
     caller      : TDBTransaction,
     target      : string,
     response    : string | string[] | {[key: string]: any}
 }
+
+// TableDB Transactions Todo: Change to variant
 
 const TDBTransactionL = ['open', 'read', 'write', 'search'] as const;
 export type TDBTransaction = (typeof TDBTransactionL)[number];
@@ -104,11 +107,15 @@ export function isTDBTransaction(In: any): In is TDBTransaction {
     return TDBTransactionL.indexOf(In) !== -1;
 }
 
+
+// TableDB Write Options Todo: Change to variant
+
 const TDBWriteOptionL = ['open', 'read', 'write', 'search'] as const;
 export type TDBWriteOption = (typeof TDBWriteOptionL)[number];
 export function isTDBWriteOption(In: any): In is TDBWriteOption {
     return TDBWriteOptionL.indexOf(In) !== -1;
 }
+
 
 export interface WriteTransaction {
     mode    : WriteMode,
@@ -119,7 +126,9 @@ export interface WriteTransaction {
 type Store = {[key: string]: any} | []
 export type DBInstance  = {[Table: string]: Store};
 
+
 type WriteMode = 'write' | 'append' | 'delete'
+
 
 export class TableDB {
     DBInstance: DBInstance;
@@ -177,7 +186,7 @@ export const Handle = (Request: TDBTransaction, Target: string, TableDBInstance:
 
 //#region Dev Tools
 const _DEBUG_MODE = true;
-export function log(ns: NS, term: string, log: string){
+export function log(ns: NS, term: string, log: string, extend?: any){
     if (_DEBUG_MODE){
         switch (term){
             case 'term':

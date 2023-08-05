@@ -89,44 +89,60 @@ export class Dispatcher {
             default: return "[Andromeda] : Err; Cannot identify OperationID";
         }
 
-        this.ns.exec(
-            op_src,
-            cfg.host,
-            this.threads[OperationID],
-            '--target', `${this.target}`,
-            '--mode', 'once',
-            '--delay', 0,
-            '--id', crypto.randomUUID());
+        // call Axiom =====
 
-        log (this.ns,
-            'scriptlog',
-            `[Andromeda] : Deployed ${operation[op_code]}`);
+        if (op_src !== '' || op_src != undefined){
+            this.ns.exec(
+                op_src,
+                cfg.host,
+                this.threads[OperationID],
+                '--target', `${this.target}`,
+                '--mode', 'once',
+                '--delay', 0,
+                '--id', crypto.randomUUID());
+
+            // optional log
+            log (this.ns,
+                'scriptlog',
+                `[Andromeda] : Deployed ${operation[op_code]}`);
+        } else {
+            // exception log
+            log (this.ns,
+                'scriptlog',
+                `[Andromeda] : Failed to deploy Axiom. Operation ID undefined...`);
+        }
+
+
+
     }
 }
 
 // ====================== Scheduler ======================
 
 export class Scheduler {
-    
-    state       : SchedulerState;
-    schedules   : n_arr4[];
-    dispatcher  : Dispatcher;
+
+    private state       : SchedulerState;
+    private schedules   : n_arr4[];
+    private dispatcher  : Dispatcher;
 
     constructor (ns: NS, XAVT: XAVT){
-
         this.state      = {
+            // configuration
             ns          : ns,
             active      : true,
-
-            start_time  : new Date().getTime(),
-            cycles      : 0,
-            clock       : 0,
             speed       : 20,
-            diff        : 0,
-            RT          : 0,
-            TT          : 0,
             interval    : 1000,
             axiom_offset: 25,
+
+            // correction
+            TT          : 0,
+            RT          : 0,
+            diff        : 0,
+
+            // observable
+            clock       : 0,
+            cycles      : 0,
+            start_time  : new Date().getTime(),
         }
 
         this.schedules  = [

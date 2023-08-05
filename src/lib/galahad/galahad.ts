@@ -27,6 +27,11 @@ export class Galahad {
 
     // ====================== Props ======================
 
+
+    // optional runtime: separated clocks per clusternet target
+
+
+
     state: GalahadState;
 
     constructor() {
